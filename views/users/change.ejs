@@ -1,7 +1,6 @@
 <div class="my-5 row justify-content-center mx-3">
-    <h1 class="text-center">비밀번호 변경</h1>
+    <h1 class="text-center mb-5">비밀번호변경</h1>
     <form name="frm" class="card p-3 col-md-6" method="post">
-        <input name="uid" type="hidden">
         <input name="upass" class="form-control mb-3" placeholder="현재 비밀번호" type="password">
         <input name="npass" class="form-control mb-1" placeholder="새 비밀번호" type="password">
         <input name="cpass" class="form-control mb-3" placeholder="새 비밀번호 확인" type="password">
@@ -9,7 +8,6 @@
     </form>
 </div>
 <script>
-    $(frm.uid).val(sessionStorage.getItem("uid"));
     $(frm).on("submit", function(e){
         e.preventDefault();
         const upass=$(frm.upass).val();
@@ -20,12 +18,12 @@
             $(frm.upass).focus();
         }else if(npass==""){
             alert("새 비밀번호를 입력하세요!");
-            $(frm.npass).focus();
+            $(frm.npass).focus();   
         }else if(cpass==""){
-            alert("새 비밀번호 확인을 입력하세요!")
+            alert("새 비밀번호 확인을 입력하세요!");
             $(frm.cpass).focus();
         }else if(cpass!=npass) {
-            alert("새 비밀번호와 비밀번호 확인이 일치하지 않습니다!");
+            alert("새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
             $(frm.npass).focus();
         }else{
             $.ajax({
@@ -33,14 +31,22 @@
                 url:"/users/login",
                 data:{uid:sessionStorage.getItem('uid'), upass:upass},
                 success:function(data){
-                    if(data==2){
+                    if(data==2) {
                         alert("비밀번호가 일치하지 않습니다.");
                     }else {
                         if(confirm("새로운 비밀번호로 변경하실래요?")) {
-                            sessionStorage.clear();
-                            frm.submit();
+                            $.ajax({
+                                type:"post",
+                                url:"/users/change",
+                                data:{uid:sessionStorage.getItem("uid"), npass:npass},
+                                success:function(){
+                                    alert("비밀번호가 변경되었습니다.");
+                                    sessionStorage.clear();
+                                    location.href="/users/login";
+                                }
+                            });
                         }
-                    }                                                   //1인경우 (0은 안나옴 아이디는 이미 있기 때문에) 
+                    }
                 }
             });
         }

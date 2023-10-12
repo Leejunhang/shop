@@ -122,7 +122,8 @@ router.post('/change', function(req, res){
     const sql='update users set upass=? where uid=?';
     db.get().query(sql, [upass, uid], function(err, rows){
         if(err) console.log(err);
-        res.redirect('/users/login');
+        res.sendStatus(200);
+        //res.redirect('/users/login');
     });
 });
 
