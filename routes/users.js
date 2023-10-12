@@ -109,4 +109,21 @@ router.post('/update',upload.single('file'), function(req, res){
         res.redirect('/users/mypage?uid=' + uid);
     });
 });
+
+//비밀번호 변경 페이지 이동
+router.get('/change', function(req, res){
+    res.render('index', {title:'비밀번호변경', pageName:'users/change.ejs'});
+});
+
+//비밀번호 변경
+router.post('/change', function(req, res){
+    const uid=req.body.uid;
+    const upass=req.body.npass;
+    const sql='update users set upass=? where uid=?';
+    db.get().query(sql, [upass, uid], function(err, rows){
+        if(err) console.log(err);
+        res.redirect('/users/login');
+    });
+});
+
 module.exports = router;
