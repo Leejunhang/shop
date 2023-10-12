@@ -7,19 +7,20 @@ router.get('/', function(req, res, next) {
   res.render('index', {title:'사용자목록', pageName:'users/list.ejs'})
 });
 
-//사용자 목록 JSON
+//사용자목록 JSON
 router.get('/list.json', function(req, res){
-    const sql='select * from users order by uname'
+    const sql='select * from users order by uname';
     db.get().query(sql, function(err, rows){
         res.send(rows);
     });
 });
-//로그인 페이지 이동
+
+//로그인페이지
 router.get('/login', function(req, res){
   res.render('index', {title:'로그인', pageName:'users/login.ejs'})
 });
 
-//로그인 체크
+//로그인체크
 router.post('/login', function(req, res){
     const uid=req.body.uid;
     const upass=req.body.upass;
@@ -37,24 +38,58 @@ router.post('/login', function(req, res){
     });
 });
 
-//회원가입 페이지
+//회원가입페이지 이동
 router.get('/insert', function(req, res){
-    res.render('index',{title:'회원가입', pageName:'users/insert.ejs'});
+    res.render('index', {title:'회원가입', pageName:'users/insert.ejs'})
 });
-
 
 //회원가입
 router.post('/insert', function(req, res){
     const uid=req.body.uid;
     const upass=req.body.upass;
     const uname=req.body.uname;
+    const address1=req.body.address1;
+    const address2=req.body.address2;
+    const phone=req.body.phone;
+    console.log(uid, upass, uname, address1, address2, phone);
+    const sql='insert into users(uid,upass,uname,phone,address1,address2) values(?,?,?,?,?,?)';
+    db.get().query(sql,[uid,upass,uname,phone,address1,address2], function(err, rows){
+        res.redirect('/users/login');
+    });
+});
+
+//마이페이지 이동
+router.get('/mypage', function(req, res){
+    const uid=req.query.uid;
+    const sql='select * from users where uid=?';
+    db.get().query(sql, [uid], function(err, rows){
+        //console.log('..........', rows[0]);
+        res.render('index', {title:'마이페이지', pageName:'users/mypage.ejs', user:rows[0]});
+    });
+});
+
+//수정페이지 이동
+router.get('/update', function(req, res){
+    const uid=req.query.uid;
+    const sql='select * from users where uid=?';
+    db.get().query(sql, [uid], function(err, rows){
+        //console.log('..........', rows[0]);
+        res.render('index', {title:'정보수정', pageName:'users/update.ejs', user:rows[0]});
+    });
+});
+
+//정보 수정
+router.post('/update', function(req, res){
+    const uid=req.body.uid;
+    const uname=req.body.uname;
     const phone=req.body.phone;
     const address1=req.body.address1;
     const address2=req.body.address2;
-    console.log(uid, upass, uname, phone, address1, address2);
-    const sql="insert into users(uid, upass, uname, phone, address1, address2) values(?,?,?,?,?,?)";
-    db.get().query(sql, [uid, upass, uname, phone, address1, address2], function(err, rows){
-        res.redirect('/users/login')
+    console.log(uid, uname, phone, address1, address2);
+    const sql='update users set uname=?, phone=?, address1=?, address2=? where uid=?';
+    db.get().query(sql,[uname, phone, address1, address2, uid], function(err, rows){
+        if(err) console.log(err);
+        res.redirect('/users/mypage?uid=' + uid);
     });
 });
 module.exports = router;

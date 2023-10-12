@@ -42,4 +42,9 @@
         sessionStorage.clear();
         location.href="/";
     });
+
+    $("#mypage").on("click", "a", function(e){
+        e.preventDefault();
+        location.href="/users/mypage?uid=" + sessionStorage.getItem("uid");
+    });
   </script>

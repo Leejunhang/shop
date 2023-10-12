@@ -21,7 +21,7 @@
         <div class="input-group mb-1">
             <span class="input-group-text">주소</span>
             <input name="address1" class="form-control">
-            <button class="btn btn-primary">주소검색</button>
+            <button id="search" class="btn btn-primary" type="button">주소검색</button>
         </div>
         <div>
             <input name="address2" class="form-control" placeholder="상세주소">
@@ -59,8 +59,8 @@
             }
         }
     });
-
-    //아이디 중복체크
+                
+    //중복체크 버튼을 클릭한 경우
     $("#check").on("click", function(){
         const uid=$(frm.uid).val();
         if(uid=="") {
@@ -85,8 +85,22 @@
         });
     });
 
-    //아이디가 바뀌었을때 
+    //아이디가 바뀌었을때 (아이디가 변경된 경우)
     $(frm.uid).on("change", function(){
         check=false;
+    });
+
+    //주소검색버튼을 클릭한 경우
+    $("#search").on("click", function(){
+        new daum.Postcode({
+            oncomplete:function(data){
+                console.log(data);
+                if(data.buildingName != ""){
+                    $(frm.address1).val(data.address + " "  + data.buildingName);
+                }else{
+                    $(frm.address1).val(data.address);
+                }
+            }
+        }).open();
     });
 </script>
