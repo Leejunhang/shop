@@ -20,7 +20,7 @@
         </div>
         <hr>
         <div>
-            <img src="http://via.placeholder.com/150x150" id="photo" width="200">
+            <img src="http://via.placeholder.com/150x150" id="photo" width="200" class="photo">
             <input type="file" name="file" class="form-control mt-2">
             <input name="photo" value="<%=user.photo%>" type="hidden">
         </div>
@@ -31,6 +31,7 @@
     </form>
 </div>
 <script>
+    //사진출력
     const photo="<%=user.photo%>";
     if(photo==""){
         $('#photo').attr("src", "https://via.placeholder.com/150x150")
@@ -41,7 +42,7 @@
     $(frm.file).on("change", function(e){
         $("#photo").attr("src", URL.createObjectURL(e.target.files[0]));
     });
-    //수정버튼을 눌렀을때
+    //수정버튼을 눌렀을때 (폼이 서밋되는 경우)
     $(frm).on("submit", function(e){
         e.preventDefault();
         const uid=$(frm.uid).val();
@@ -49,7 +50,9 @@
         const phone=$(frm.phone).val();
         const address1=$(frm.address1).val();
         const address2=$(frm.address2).val();
-        if(confirm("변경된 내용을 저장하실래요?")) frm.submit();
+        if(confirm("변경된 내용을 저장하실래요?")) {
+            frm.submit();
+        }
     });
 
 

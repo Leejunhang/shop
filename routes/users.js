@@ -10,7 +10,7 @@ var upload = multer({
             done(null, './public/upload/photo')
         },
         filename:(req, file, done)=>{
-            var fileName=Date.now() + ".jpg";
+            var fileName=Date.now() + ".jpg"; // 똑같은 파일을 많이 만들면 오류가 날 수 있으므로 date.now함수를 이용
             done(null, fileName);
         }
     })
@@ -92,23 +92,7 @@ router.get('/update', function(req, res){
     });
 });
 
-//정보 수정 
-router.post('/update',upload.single('file'), function(req, res){
-    const uid=req.body.uid;
-    const uname=req.body.uname;
-    const phone=req.body.phone;
-    const address1=req.body.address1;
-    const address2=req.body.address2;
-    let photo=req.body.photo;
-    if(req.file) photo = req.file.filename;
-    console.log('photo...', photo);
 
-    const sql='update users set uname=?, phone=?, address1=?, address2=?, photo=? where uid=?';
-    db.get().query(sql,[uname, phone, address1, address2, photo, uid], function(err, rows){
-        if(err) console.log(err);
-        res.redirect('/users/mypage?uid=' + uid);
-    });
-});
 
 //비밀번호 변경 페이지 이동
 router.get('/change', function(req, res){
@@ -126,5 +110,19 @@ router.post('/change', function(req, res){
         //res.redirect('/users/login');
     });
 });
-
+// 정보 수정하기
+router.post('/update', upload.single('file'), function(req, res){
+    const uname=req.body.uname;
+    const uid=req.body.uid;
+    const phone=req.body.phone;
+    const address1=req.body.address1
+    const address2=req.body.address2
+    let photo=req.body.photo;
+    if(req.file) photo=req.file.filename;
+    const sql='update users set uname=?, phone=?, address1=?, address2=?, photo=? where uid=?'
+    db.get().query(sql,[uname, phone, address1, address2, photo, uid], function(err, rows){
+        if(err) console.log('sql 오류......................', err);
+        res.redirect('/users/mypage?uid=' + uid);
+    });
+});
 module.exports = router;

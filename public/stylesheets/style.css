@@ -17,3 +17,11 @@ form span {
   border-radius: 50%;
   border: 1px solid gray;
 }
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
