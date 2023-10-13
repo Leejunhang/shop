@@ -52,10 +52,10 @@
         visiblePages: 5, // 하단에서 한 번에 보여 지는 페이지 번호 수
         startPage : 1, // 시작 시 표시되는 현재 페이지
         initiateStartPageClick: false, // 플러그인이 시작 시 페이지 버튼 클릭 여부 (default : true) 
-        first : '<<', // 페이지네이션 버튼 중 처음으로 돌아가는 버튼에 쓰여 있는 텍스트
-        prev : '<', // 이전 페이지 버튼에 쓰여 있는 텍스트
-        next : '>', // 다음 페이지 버튼에 쓰여 있는 텍스트
-        last : '>>', // 페이지네이션 버튼 중 마지막으로 가는 버튼에 쓰여 있는 텍스트
+        first : '<i class="bi bi-chevron-bar-left"></i>', // 페이지네이션 버튼 중 처음으로 돌아가는 버튼에 쓰여 있는 텍스트
+        prev : '<i class="bi bi-chevron-left"></i>', // 이전 페이지 버튼에 쓰여 있는 텍스트
+        next : '<i class="bi bi-chevron-right"></i>', // 다음 페이지 버튼에 쓰여 있는 텍스트
+        last : '<i class="bi bi-chevron-bar-right"></i>', // 페이지네이션 버튼 중 마지막으로 가는 버튼에 쓰여 있는 텍스트
         onPageClick: function (event, clickPage) {
             page=clickPage; 
             getBooks(); 
