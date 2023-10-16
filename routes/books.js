@@ -54,4 +54,52 @@ router.get('/count', function(req, res){
       res.send(rows[0]);
     });
 });
+
+//도서 삭제 / db 관련작업은 post 추천?  (데이터를 넘겨줄 때 데이터는 겟은 쿼리에, 포스트는 바디에 들어감)
+router.post('/delete', function(req, res){
+    const bid=req.body.bid;
+    const sql="delete from books where bid=?"
+    db.get().query(sql, [bid], function(err){
+        if(err) console.log("도서 삭제...", err);
+        res.sendStatus(200);
+    });
+});
+
+//도서 정보 페이지 이동  ? 로 받은 값은 query로 받는다!
+router.get('/read', function(req, res){
+    const bid=req.query.bid;
+    const sql="select *,format(price, 0) fmtprice, date_format(regdate, '%Y-%m-%d') fmtdate from books where bid=?";
+    db.get().query(sql, [bid], function(err, rows){
+        if(err) console.log('도서정보"....',err);
+        res.render('index', {title:'도서정보', pageName:'books/read.ejs', book:rows[0]});
+    })
+});
+
+//도서 수정페이지이동
+router.get('/update', function(req, res){
+    const bid=req.query.bid;
+    const sql="select *,format(price, 0) fmtprice, date_format(regdate, '%Y-%m-%d') fmtdate from books where bid=?";
+    db.get().query(sql, [bid], function(err, rows){
+        if(err) console.log('도서정보"....',err);
+        res.render('index', {title:'도서 정보 수정', pageName:'books/update.ejs', book:rows[0]});
+    })
+})
+
+//도서 수정 post로 서밋했을 경우 body에 들어가있다.  // fmtdate는 등록일 변수명. 이고 regdate는 sql문 테이블에 들어갈 열을 말한다.
+router.post('/update', function(req, res){
+    const bid=req.body.bid;
+    const title=req.body.title;
+    const price=req.body.price;
+    const authors=req.body.authors;
+    const publisher=req.body.publisher;
+    const contents=req.body.contents;
+    const fmtdate=req.body.fmtdate;
+    const updatedate=req.body.updatedate;
+    //console.log(bid,title,price,authors,publisher,contents);
+    const sql='update books set title=?,price=?,authors=?,publisher=?,contents=? ,regdate=?, updatedate=? where bid=?';
+    db.get().query(sql,[title,price,authors,publisher,contents, fmtdate, updatedate, bid],function(err){
+        if(err) console.log('수정오류..........', err);
+        res.redirect('/books/read?bid=' + bid);
+    })
+});
 module.exports = router;
