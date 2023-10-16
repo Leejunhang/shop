@@ -1,6 +1,22 @@
 <div class="my-5">
     <h1 class="text-center mb-5">도서목록</h1>
-    <div>현재 등록된 전체 도서 수:<span id="total"></span></div>
+    <div class="row">
+        <form name="frm" class="col-md-6">
+            <div class="input-group">
+                <select name="key" class="form-select me-2">
+                    <option value="title">제목</option>
+                    <option value="authors">저자</option>
+                    <option value="publisher">출판사</option>
+                    <option value="contents">내용</option>
+                </select>
+            <input name="query" class="form-control" placeholder="검색어">
+            <button class="btn btn-primary">검색</button>
+            </div>
+        </form>
+    <div class="col text-end pt-2">
+            현재 등록된 전체 도서 수:<span id="total"></span>
+    </div>
+    </div>
     <hr>
     <div id="div_books"></div>
     <div id="pagination" class="pagination justify-content-center mt-5"></div>
@@ -17,6 +33,7 @@
         {{#each .}}
             <tr>
                 <td><input class="chk" type="checkbox" bid="{{bid}}"></td>
+                <td><img src="{{isImage image}}" width="30px"></td>
                 <td width="5%">{{bid}}</td>
                 <td width="20%">
                     <div class="ellipsis">
@@ -32,9 +49,25 @@
     </table>
 </script>
 <script>
+    Handlebars.registerHelper("isImage", function(image){
+        if(image){
+            return image;
+        }else {
+            return "http://via.placeholder.com/170x230";
+        }
+    });
+</script>
+<script>
     let page=1;
     //getBooks();
     getTotal();
+
+    //폼이 서밋인 경우
+    $(frm).on("submit", function(e){
+        e.preventDefault();
+        page=1;
+        getTotal();
+    });
 
     //선택삭제 버튼을 클릭한 경우
     $("#div_books").on("click", ".sel-delete", function(){
@@ -76,13 +109,22 @@
         }
     });
     function getTotal(){
+        const key=$(frm.key).val();
+        const query=$(frm.query).val();
         $.ajax({
             type:"get",
             url:"/books/count",
+            data:{key, query},
             success:function(data){
                 $("#total").html(data.total + "권");
+                if(data.total>0){
                 const totalPages = Math.ceil(data.total/5);
                 $("#pagination").twbsPagination("changeTotalPages", totalPages, page)
+                }else{
+                    alert("검색 내용이 없습니다.");
+                    $(frm.query).val("");
+                    getTotal();
+                }
             }
         })
     }
@@ -100,15 +142,20 @@
             }
         });
     });
+
     function getBooks(){
+        const key=$(frm.key).val();
+        const query=$(frm.query).val();
+        //alert(key + query);
         $.ajax({
             type:"get",
             url:"/books/list.json",
-            data:{page},
+            data:{page, key, query},
             success:function(data){
                 //console.log(data);
                 const temp=Handlebars.compile($("#temp_books").html());
                 $("#div_books").html(temp(data));
+                const totalPages=20;
             }
         })
     }

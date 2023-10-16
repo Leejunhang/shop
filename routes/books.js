@@ -1,6 +1,20 @@
 var express = require('express');
 var router = express.Router();
 var db=require('../db');
+var multer= require('multer');
+
+//도서 이미지 업로드함수
+var upload = multer({
+    storage:multer.diskStorage({
+        destination:(req, file, done)=>{
+            done(null, './public/upload/book')
+        },
+        filename:(req, file, done)=>{
+            var fileName=Date.now() + ".jpg"; // 똑같은 파일을 많이 만들면 오류가 날 수 있으므로 date.now함수를 이용
+            done(null, fileName);
+        }
+    })
+});
 
 /* 도서 검색페이지 */
 router.get('/', function(req, res, next) {
@@ -35,8 +49,10 @@ router.post('/search/insert', function(req, res) {
 router.get('/list.json', function(req, res){
   const page=req.query.page;
   const start=(parseInt(page)-1)*5;
-  const sql='select * from books order by bid desc limit ?,5';
-  db.get().query(sql, [start], function(err, rows){
+  const key=req.query.key;
+  const query=`%${req.query.query}%`;
+  const sql=`select * from books where ${key} like ? order by bid desc limit ?,5`;
+  db.get().query(sql, [query, start], function(err, rows){
     if(err) console.log('도서목록JSON:' , err);
     res.send(rows);
   });
@@ -49,8 +65,10 @@ router.get('/list',function(req, res){
 
 //데이터 총 갯수 출력 (책 추가한 총 갯수)
 router.get('/count', function(req, res){
-    const sql='select count(*) total from books'
-    db.get().query(sql, function(err, rows){
+    const key=req.query.key;
+    const query='%' + req.query.query + '%';
+    const sql=`select count(*) total from books where ${key} like ?`;
+    db.get().query(sql, [query], function(err, rows){
       res.send(rows[0]);
     });
 });
@@ -101,5 +119,19 @@ router.post('/update', function(req, res){
         if(err) console.log('수정오류..........', err);
         res.redirect('/books/read?bid=' + bid);
     })
+});
+
+//이미지 업로드
+router.post('/upload', upload.single('file'), function(req, res){
+    if(req.file){
+        const bid=req.body.bid;
+        //console.log("파일 이름:", req.file.filename, bid);
+        const image = '/upload/book/' + req.file.filename;
+        const sql='update books set image=? where bid=?';
+        db.get().query(sql, [image, bid], function(err){
+        if(err) console.log('이미지 업로드 오류:', err)
+        res.redirect('/books/read?bid=' + bid);
+        });
+    }
 });
 module.exports = router;
