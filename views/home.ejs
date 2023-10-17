@@ -1,3 +1,75 @@
 <div class="my-5">
-    <h1 class="text-center">홈페이지</h1>
+    <div id="div_books" class="row"></div>
+    <div id="pagination" class="pagination justify-content-center mt-5"></div>    
 </div>
+<script id="temp_books" type="x-handlebars-template">
+    {{#each .}}
+        <div class="col-md-4 col-lg-2 col-6">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <img src="{{image}}" width="90%">
+                    <div class="ellipsis mt-2">{{title}}</div>
+                </div>
+                <div class="card-footer">
+                    {{fmtPrice price}}
+                </div>    
+            </div>
+        </div>
+    {{/each}}
+</script>
+<script>
+    Handlebars.registerHelper("isImage", function(image){
+        if(image) {
+            return image;
+        }else {
+            return "http://via.placeholder.com/170x230";
+        }
+    });
+
+    Handlebars.registerHelper("fmtPrice", function(price){
+        return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "원"
+    });
+</script>
+<script>    
+    let page=1;
+    getTotal();
+    function getTotal(){
+        $.ajax({
+            type:"get",
+            url:"/count",
+            success:function(data){
+                const totalPages = Math.ceil(data/6);
+                $("#pagination").twbsPagination("changeTotalPages", totalPages, page)
+            }
+        });
+    }
+
+    function getBooks(){
+        $.ajax({
+            type:"get",
+            url:"/books.json",
+            data:{page},
+            success:function(data){
+                console.log(data);
+                const temp=Handlebars.compile($("#temp_books").html());
+                $("#div_books").html(temp(data));
+            }
+        })
+    }
+
+    $('#pagination').twbsPagination({
+        totalPages:10, //총 페이지 번호 수
+        visiblePages: 5, // 하단에서 한 번에 보여 지는 페이지 번호 수
+        startPage : 1, // 시작 시 표시되는 현재 페이지
+        initiateStartPageClick: false, // 플러그인이 시작 시 페이지 버튼 클릭 여부 (default : true) 
+        first : '<i class="bi bi-chevron-bar-left"></i>', // 페이지네이션 버튼 중 처음으로 돌아가는 버튼에 쓰여 있는 텍스트
+        prev : '<i class="bi bi-chevron-left"></i>', // 이전 페이지 버튼에 쓰여 있는 텍스트
+        next : '<i class="bi bi-chevron-right"></i>', // 다음 페이지 버튼에 쓰여 있는 텍스트
+        last : '<i class="bi bi-chevron-bar-right"></i>', // 페이지네이션 버튼 중 마지막으로 가는 버튼에 쓰여 있는 텍스트
+        onPageClick: function (event, clickPage) {
+            page=clickPage;
+            //alert(page); 
+            getBooks(); 
+        }
+    });
+</script>
