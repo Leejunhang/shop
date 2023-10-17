@@ -1,4 +1,15 @@
 <div class="my-5">
+    <div class="row mb-3">
+        <form name="frm" class="col-md-4">
+            <div class="input-group">
+                <input name="query" class="form-control" placeholder="검색어">
+                <button class="btn btn-primary">검색</button>
+            </div>
+        </form>
+        <div class="col pt-2">
+            <span id="total">0권</span>
+        </div>
+    </div>
     <div id="div_books" class="row"></div>
     <div id="pagination" class="pagination justify-content-center mt-5"></div>    
 </div>
@@ -7,7 +18,9 @@
         <div class="col-md-4 col-lg-2 col-6">
             <div class="card mb-3">
                 <div class="card-body">
-                    <img src="{{image}}" width="90%">
+                    <a href="/books/info?bid={{bid}}">
+                        <img src="{{image}}" width="90%">
+                    </a>
                     <div class="ellipsis mt-2">{{title}}</div>
                 </div>
                 <div class="card-footer">
@@ -33,13 +46,28 @@
 <script>    
     let page=1;
     getTotal();
+
+    $(frm).on("submit", function(e){
+        e.preventDefault();
+        page=1;
+        getTotal();
+    });
+
     function getTotal(){
         $.ajax({
             type:"get",
             url:"/count",
+            data:{query:$(frm.query).val()},
             success:function(data){
-                const totalPages = Math.ceil(data/6);
-                $("#pagination").twbsPagination("changeTotalPages", totalPages, page)
+                if(data==0){
+                    alert("검색된 도서가 없습니다!");
+                    $(frm.query).val("");
+                    getTotal();
+                }else{
+                    $("#total").html("검색된 도서는 총 " + data + "권 입니다!");
+                    const totalPages = Math.ceil(data/6);
+                    $("#pagination").twbsPagination("changeTotalPages", totalPages, page)
+                }
             }
         });
     }
@@ -48,7 +76,7 @@
         $.ajax({
             type:"get",
             url:"/books.json",
-            data:{page},
+            data:{page, query:$(frm.query).val()},
             success:function(data){
                 console.log(data);
                 const temp=Handlebars.compile($("#temp_books").html());

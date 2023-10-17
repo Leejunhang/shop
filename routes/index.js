@@ -16,10 +16,12 @@ router.get('/search', function(req, res){
 //도서목록 JSON
 router.get('/books.json', function(req, res){
   const page=parseInt(req.query.page);
+  const query=`%${req.query.query}%`;
+  //console.log('.........', query);
   //console.log('........', page);
   const start=(page-1)*6;
-  const sql=`select * from books order by bid desc limit ?,6`;
-  db.get().query(sql,[start], function(err, rows){
+  const sql=`select * from books where title like ? or authors like ?  order by bid desc limit ?,6`;
+  db.get().query(sql,[query, query, start], function(err, rows){
     if(err) console.log('도서목록 JSON 오류:', err);
     res.send(rows);
   })
@@ -27,8 +29,9 @@ router.get('/books.json', function(req, res){
 
 //홈페이지 도서 갯수 출력
 router.get('/count', function(req, res){
-    const sql='select count(*) total from books';
-    db.get().query(sql, function(err, rows){
+    const query=`%${req.query.query}%`;
+    const sql='select count(*) total from books where title like ? or authors like ?';
+    db.get().query(sql,[query, query], function(err, rows){
         res.send(rows[0].total.toString());
     });
 });
