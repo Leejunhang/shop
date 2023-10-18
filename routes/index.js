@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var db= require('../db')
+var db= require('../db');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -43,4 +43,6 @@ router.get('/count', function(req, res){
         res.send(rows[0].total.toString());
     });
 });
+
+
 module.exports = router;

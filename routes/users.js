@@ -125,4 +125,8 @@ router.post('/update', upload.single('file'), function(req, res){
         res.redirect('/users/mypage?uid=' + uid);
     });
 });
+
+// 사진 삭제하기
+
+
 module.exports = router;

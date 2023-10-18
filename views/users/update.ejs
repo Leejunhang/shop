@@ -23,6 +23,7 @@
             <img src="http://via.placeholder.com/150x150" id="photo" width="200" class="photo">
             <input type="file" name="file" class="form-control mt-2">
             <input name="photo" value="<%=user.photo%>" type="hidden">
+            <button id="resetImg" class="btn btn-success" type="button" text="end">이미지 초기화</button>
         </div>
         <div class="text-center my-3">
             <button class="btn btn-primary">수정</button>
@@ -38,6 +39,12 @@
     }else{
         $('#photo').attr("src", "/upload/photo/" + photo);
     }
+
+    //사진 초기화
+    $('#resetImg').on('click', function(e){
+        $('#photo').attr("src", "https://via.placeholder.com/150x150")
+    });
+
     //파일 바뀐경우 미리보기
     $(frm.file).on("change", function(e){
         $("#photo").attr("src", URL.createObjectURL(e.target.files[0]));
