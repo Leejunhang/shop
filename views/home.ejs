@@ -11,7 +11,7 @@
         </div>
     </div>
     <div id="div_books" class="row"></div>
-    <div id="pagination" class="pagination justify-content-center mt-5"></div>    
+    <div id="pagination" class="pagination justify-content-center mt-5"></div>
 </div>
 <script id="temp_books" type="x-handlebars-template">
     {{#each .}}
@@ -19,33 +19,75 @@
             <div class="card mb-3">
                 <div class="card-body">
                     <a href="/books/info?bid={{bid}}">
-                        <img src="{{image}}" width="90%">
-                    </a>
+                        <img src="{{isImage image}}" width="90%">
+                    </a>    
                     <div class="ellipsis mt-2">{{title}}</div>
-                </div>
-                <div class="card-footer">
-                    {{fmtPrice price}}
                 </div>    
-            </div>
-        </div>
+                <div class="card-footer">
+                    <span style="font-size:0.7rem;">{{fmtPrice price}}</span>
+                    <span class="float-end">
+                        <i class="bi {{heart ucnt}} like" bid={{bid}}></i>
+                        <span class="count">{{fcnt}}</span>
+                    </span>    
+                </div>    
+            </div>    
+        </div>    
     {{/each}}
 </script>
 <script>
+    Handlebars.registerHelper("heart", function(ucnt){
+        if(ucnt==1){
+            return "bi-heart-fill";
+        }else{
+            return "bi-heart";
+        }
+    })
     Handlebars.registerHelper("isImage", function(image){
-        if(image) {
+        if(image){
             return image;
         }else {
             return "http://via.placeholder.com/170x230";
         }
     });
-
     Handlebars.registerHelper("fmtPrice", function(price){
         return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "원"
     });
 </script>
-<script>    
+<script>
     let page=1;
     getTotal();
+    
+    //좋아요 추가
+    $("#div_books").on("click", ".bi-heart", function(){
+        if(!sessionStorage.getItem("uid")){
+            location.href="/users/login";
+        }else{
+            const bid=$(this).attr("bid");
+            $.ajax({
+                type:"post",
+                url:"/books/like/insert",
+                data:{uid:sessionStorage.getItem("uid"), bid},
+                success: function(){
+                    alert("좋아요 추가!");
+                    getTotal();
+                }
+            })
+        }
+    });
+
+    //좋아요 삭제
+    $("#div_books").on("click", ".bi-heart-fill", function(){
+        const bid=$(this).attr("bid");
+        $.ajax({
+            type:"get",
+            url:"/books/like/delete",
+            data:{uid:sessionStorage.getItem("uid"), bid},
+            success:function(){
+                alert("좋아요 취소!");
+                getTotal();
+            }
+        })
+    });
 
     $(frm).on("submit", function(e){
         e.preventDefault();
@@ -60,13 +102,13 @@
             data:{query:$(frm.query).val()},
             success:function(data){
                 if(data==0){
-                    alert("검색된 도서가 없습니다!");
+                    alert("검색도서가 없습니다!");
                     $(frm.query).val("");
                     getTotal();
                 }else{
-                    $("#total").html("검색된 도서는 총 " + data + "권 입니다!");
+                    $("#total").html(data + "권");
                     const totalPages = Math.ceil(data/6);
-                    $("#pagination").twbsPagination("changeTotalPages", totalPages, page)
+                    $("#pagination").twbsPagination("changeTotalPages", totalPages, page);
                 }
             }
         });
@@ -76,7 +118,7 @@
         $.ajax({
             type:"get",
             url:"/books.json",
-            data:{page, query:$(frm.query).val()},
+            data:{page, query:$(frm.query).val(), uid:sessionStorage.getItem("uid")},
             success:function(data){
                 console.log(data);
                 const temp=Handlebars.compile($("#temp_books").html());
@@ -96,7 +138,6 @@
         last : '<i class="bi bi-chevron-bar-right"></i>', // 페이지네이션 버튼 중 마지막으로 가는 버튼에 쓰여 있는 텍스트
         onPageClick: function (event, clickPage) {
             page=clickPage;
-            //alert(page); 
             getBooks(); 
         }
     });

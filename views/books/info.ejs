@@ -1,22 +1,14 @@
-<style>
-    .bi{
-        color: pink;
-        cursor: pointer;
-    }
-</style>
 <div class="my-5">
-    <h1 class="text-center mb-5">도서 정보</h1>
+    <h1 class="text-center mb-5">도서정보</h1>
     <div class="row">
         <div class="col-lg-4 mb-3">
             <img src="<%=book.image%>" width="90%">
         </div>
         <div class="col pt-3">
-            <h5>
+            <h5 id="title">
                 [<%=book.bid%>] <%=book.title%>
-                <span id="like">
-                    <i class="bi bi-heart ms-2" id="like"></i>
-                    <i class="bi bi-heart-fill ms-2" style="display: none;"></i>
-                </span>
+                <i class="bi bi-heart ms-3 like" id="like"></i>
+                <span id="count" class="count">0</span>
             </h5>
             <hr>
             <div class="my-3">저 자: <%=book.authors%></div>
@@ -25,45 +17,58 @@
             <div class="my-3">출판사: <%=book.publisher%></div>
             <div class="my-3">ISBN: <%=book.isbn%></div>
             <hr>
-            <button class="btn btn-success px-5">바로 구매</button>
-            <button class="btn btn-warning px-5">장바구니 담기</button>
+            <button class="btn btn-warning px-5">장바구니</button>
+            <button class="btn btn-success px-5">바로구매</button>
         </div>
     </div>
 </div>
 <script>
-    const bid="<%=book.bid%>"
-    $("#like").on("click", ".bi-heart", function(){
+    getCheck();
+
+    //빈하트 클릭(추가)
+    $("#title").on("click", ".bi-heart", function(){
         if(!sessionStorage.getItem("uid")){
-            sessionStorage.setItem("target", "/books/info?bid=" + bid);
-            location.href="/users/login";
+            sessionStorage.setItem("target", "/books/info?bid=<%=book.bid%>");
+            location.href="/users/login"
         }else{
-            //좋아요 추가하기
             $.ajax({
                 type:"post",
                 url:"/books/like/insert",
-                data:{bid, uid:sessionStorage.getItem("uid")},
+                data:{uid:sessionStorage.getItem("uid"), bid:"<%=book.bid%>"},
                 success:function(){
                     alert("좋아요 추가!");
-                    check();
+                    getCheck();
                 }
             });
         }
     });
 
-    //좋아요 체크
-    check();
-    function check(){
+    //채워진 하트클릭(삭제)
+    $("#title").on("click", ".bi-heart-fill", function(){
+        $.ajax({
+            type:"get",
+            url:"/books/like/delete",
+            data:{uid:sessionStorage.getItem("uid"), bid:"<%=book.bid%>"},
+            success:function(){
+                alert("좋아요 취소!");
+                getCheck();
+            }
+        })
+    });
+
+    function getCheck(){
         $.ajax({
             type:"get",
             url:"/books/like/check",
-            data:{bid,uid:sessionStorage.getItem("uid")},
+            data:{uid:sessionStorage.getItem("uid"), bid:"<%=book.bid%>"},
             success:function(data){
-                if(data==0){
-                    $("#like .bi-heart").show();
-                    $("#like .bi-heart-fill").hide();
+                $("#count").html(data.fcnt);
+                if(data.ucnt==1) {
+                    $("#like").removeClass("bi-heart");
+                    $("#like").addClass("bi-heart-fill");
                 }else{
-                    $("#like .bi-heart").hide();
-                    $("#like .bi-heart-fill").show();
+                    $("#like").removeClass("bi-heart-fill");
+                    $("#like").addClass("bi-heart");
                 }
             }
         })

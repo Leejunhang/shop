@@ -25,3 +25,11 @@ form span {
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
 }
+.like {
+  color: red;
+  cursor: pointer;
+}
+
+.count {
+  font-size: 0.5rem;
+}
