@@ -24,22 +24,26 @@
         </ul>
         <ul class="navbar-nav d-flex">
             <li class="nav-item" id="login">
-                <a class="nav-link active" aria-current="page" href="/users/login">LOGIN</a>
+                <a class="nav-link active" aria-current="page" href="/users/login">LOGIN<i class="bi bi-box-arrow-left"></i></a>
             </li>
             <li class="nav-item" style="display:none;" id="mypage">
                 <a class="nav-link active" aria-current="page" href="/users/mypage">uid</a>
             </li>
+            <li class="nav-item" style="display:none;" id="cart">
+                <a class="nav-link active" aria-current="page" href="/cart/list">WishList<i class="bi bi-cart"></i></a>
+            </li>
             <li class="nav-item" style="display:none;" id="logout">
-                <a class="nav-link active" aria-current="page" href="/users/logout">LOGOUT</a>
+                <a class="nav-link active" aria-current="page" href="/users/logout">LogOut<i class="bi bi-box-arrow-right"></i></a>
             </li>
         </ul>
       </div>
     </div>
   </nav>
   <script>
+    const uid=sessionStorage.getItem("uid");
     if(sessionStorage.getItem("uid")){
-        $("#login, #mypage, #logout").toggle();
-        $("#mypage a").html(sessionStorage.getItem("uid"));
+        $("#login, #mypage, #logout, #cart").toggle();
+        $("#mypage a").html(uid +'<i class="bi bi-person-check"></i>');
     }
 
   $("#logout").on("click", "a", function(e){

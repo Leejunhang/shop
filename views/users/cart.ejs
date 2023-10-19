@@ -1,0 +1,161 @@
+<style>
+    .bi-trash {
+        cursor: pointer;
+        font-size: 1.5rem;
+    }
+    .qnt {
+        border: 1px solid #EEEEEE;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        padding: 5px;
+        text-align: right;
+    }
+</style>
+<div class="my-5">
+    <h1 class="text-center mb-5">장바구니</h1>
+    <div id="div_cart"></div>
+</div>
+<script id="temp_cart" type="x-handlebars-template">
+    <div class="row">
+        <div class="col ms-2">
+            <input id="all" type="checkbox">
+            <span class="ms-3">전체 선택</span>
+        </div>
+        <div class="col text-end">
+            <button class="btn-delete btn btn-danger btn-sm">선택 상품 삭제</button>
+        </div>
+    </div>
+    <hr>
+    <table class="table">
+            <tr>
+                <th colspan=4>상품명</th>
+                <th>가격</th>
+                <th>수량</th>
+                <th>합계</th>
+                <th>삭제</th>
+            </tr>
+        {{#each .}}
+            <tr>
+                <td><input cid="{{cid}}" class="chk" type="checkbox"></td>
+                <td>{{bid}}</td>
+                <td><img src="{{image}}" width="50px"></td>
+                <td>{{title}}</td>
+                <td>{{fmtprice}}원</td>
+                <td>
+                    <input class="qnt" value="{{qnt}}" size="3" oninput="isNumber(this)">
+                    <button cid="{{cid}}" class="btn-update btn btn-primary btn-sm">변경</button>
+                </td>
+                <td>{{fmtsum}}</td>
+                <td><i class="bi bi-trash" cid="{{cid}}"></i></td>
+            </tr>
+        {{/each}}
+        <tr>
+            <td colspan="8" class="text-end">
+                총 상품 금액: <span id="sum">0</span>
+            </td>    
+        </tr>
+    </table>
+</script>
+<script>
+</script>
+<script>
+    getCart();
+    //선택 상품삭제 버튼을 클릭한 경우
+    $("#div_cart").on("click", ".btn-delete", function(){
+        const chk=$("#div_cart .chk:checked").length;
+        if(chk==0) {
+            alert("삭제할 상품을 하나 이상 선택 해주세요!");
+            return;
+        }
+        $("#div_cart .chk:checked").each(function(){
+            const cid=$(this).attr("cid");
+            $.ajax({
+                type:"post",
+                url:"/cart/delete",
+                data:{cid},
+                success:function(){}
+            });
+            getCart();
+        });
+    });
+
+
+    //all 체크박스를 클릭한 경우
+    $("#div_cart").on("click", "#all", function(){
+        if($(this).is(":checked")){
+            $("#div_cart .chk").prop("checked", true);
+        }else{
+            $("#div_cart .chk").prop("checked", false);
+        }
+    });
+
+    //각 행의 chk 체크박스를 클릭했을 경우
+    $("#div_cart").on("click", ".chk", function(){
+        const all=$("#div_cart .chk").length;
+        const chk=$("#div_cart .chk:checked").length;
+        if(all==chk){
+            $("#div_cart #all").prop("checked", true);
+        }else{
+            $("#div_cart #all").prop("checked", false)
+        }
+    });
+
+    //변경 버튼을 클릭한 경우
+    $("#div_cart").on("click", ".btn-update", function(){
+        const cid=$(this).attr("cid");
+        const qnt=$(this).parent().find(".qnt").val();
+        if(qnt=="") {
+            $(this).parent().find(".qnt").val(1);
+            return;
+        }
+        if(confirm(`수량을 ${qnt}권으로 변경하실래요?`)){
+            $.ajax({
+                type:"post",
+                url:"/cart/update",
+                data:{cid, qnt},
+                success:function(){
+                    getCart();
+                }
+            })
+        }
+    });
+
+    //숫자인 경우에만 입력
+    function isNumber(item){
+        item.value=item.value.replace(/[^0-9]/g, '');
+    }
+
+    //삭제 아이콘을 클릭한 경우
+    $("#div_cart").on("click", ".bi-trash", function(){
+        const cid=$(this).attr("cid");
+        if(confirm(`${cid}번 도서를 삭제하실래요?`)){
+            $.ajax({
+                type:"post",
+                url:"/cart/delete",
+                data:{cid},
+                success:function(){
+                    getCart();
+                }
+            })
+        }
+    });
+
+    function getCart(){
+        $.ajax({
+            type:"get",
+            url:"/cart/list.json",
+            data:{uid:sessionStorage.getItem("uid")},
+            success:function(data){
+                console.log(data);
+                const temp=Handlebars.compile($("#temp_cart").html());
+                $("#div_cart").html(temp(data));
+
+                let sum=0;
+                data.forEach(item=>{
+                    sum+=parseInt(item.sum);
+                });
+                $("#sum").html(sum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "원");
+            }
+        })
+    }
+</script>
