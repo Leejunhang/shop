@@ -9,48 +9,59 @@
             <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="/">Home</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="/books">도서검색</a>
+            <li class="nav-item" id="order" style="display:none;">
+                <a class="nav-link active" aria-current="page" href="/order">주문 목록</a>
+            </li>
+            <li class="nav-item" id="search" style="display:none;">
+                <a class="nav-link active" aria-current="page" href="/books">도서 검색</a>
+            </li>
+            <li class="nav-item" id="users" style="display:none;">
+                <a class="nav-link active" aria-current="page" href="/users">사용자 목록</a>
+            </li>
+            <li class="nav-item" id="order2" style="display:none;">
+                <a class="nav-link active" aria-current="page" href="/order/admin">주문 관리</a>
+            </li>
+            <li class="nav-item" id="books" style="display:none;">
+                <a class="nav-link active" aria-current="page" href="/books/list">도서 목록</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="/users">사용자목록</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="/books/list">도서목록</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="/search">지역검색</a>
+                <a class="nav-link active" aria-current="page" href="/search">지역 검색</a>
             </li>
         </ul>
         <ul class="navbar-nav d-flex">
             <li class="nav-item" id="login">
-                <a class="nav-link active" aria-current="page" href="/users/login">LOGIN<i class="bi bi-box-arrow-left"></i></a>
+                <a class="nav-link active" aria-current="page" href="/users/login">LOGIN</a>
             </li>
             <li class="nav-item" style="display:none;" id="mypage">
                 <a class="nav-link active" aria-current="page" href="/users/mypage">uid</a>
             </li>
             <li class="nav-item" style="display:none;" id="cart">
-                <a class="nav-link active" aria-current="page" href="/cart/list">WishList<i class="bi bi-cart"></i></a>
+                <a class="nav-link active" aria-current="page" href="/cart/list">장바구니</a>
             </li>
             <li class="nav-item" style="display:none;" id="logout">
-                <a class="nav-link active" aria-current="page" href="/users/logout">LogOut<i class="bi bi-box-arrow-right"></i></a>
+                <a class="nav-link active" aria-current="page" href="/users/logout">LOGOUT</a>
             </li>
         </ul>
       </div>
     </div>
   </nav>
   <script>
-    const uid=sessionStorage.getItem("uid");
-    if(sessionStorage.getItem("uid")){
-        $("#login, #mypage, #logout, #cart").toggle();
-        $("#mypage a").html(uid +'<i class="bi bi-person-check"></i>');
+    if(sessionStorage.getItem("uid") && sessionStorage.getItem("uid") != "admin"){ //일반사용자 로그인
+        $("#login, #mypage, #logout, #cart, #order").toggle();
+        $("#mypage a").html(sessionStorage.getItem("uid"));
     }
 
-  $("#logout").on("click", "a", function(e){
-    e.preventDefault();
-    if(confirm("정말로 로그아웃하실래요?"))
-        sessionStorage.clear();
-        location.href="/";
+    if(sessionStorage.getItem("uid") && sessionStorage.getItem("uid") == "admin"){ //관리자가 로그인
+        $("#login, #mypage, #logout, #search, #books, #users, #order2").toggle();
+        $("#mypage a").html(sessionStorage.getItem("uid"));
+    }
+
+    $("#logout").on("click", "a", function(e){
+        e.preventDefault();
+        if(confirm("정말로 로그아웃하실래요?")) {
+            sessionStorage.clear();
+            location.href="/";
+        }
     });
 
     $("#mypage").on("click", "a", function(e){
